@@ -1,23 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"strings"
+)
 
 func main() {
 
-	//var cards = deck{"complete", newCard()}
-	//cards = append(cards, "combination")
-	//for循环打印
-	//for i, card := range cards {
-	//	fmt.Println(i, card)
-	//}
-	//cards.printDeck()
+}
 
-	//name, age := getNameAndAge()
-	//fmt.Println(name)
-	//fmt.Println(age)
+func stringAdd2() {
 
-	demoFor()
+	var buffer bytes.Buffer
+	buffer.WriteString("Tom")
+	buffer.WriteString(" what's up")
+	fmt.Println(buffer.String())
+}
 
+func stringAdd() {
+	var name = "beidixiaoxiong"
+	var intDemo = "8989"
+	var addString = strings.Join([]string{name, intDemo}, ",")
+	println(addString)
 }
 
 func demoFor() {
