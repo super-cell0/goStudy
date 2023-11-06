@@ -3,11 +3,50 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"strings"
+	"unsafe"
 )
 
 func main() {
 
+}
+
+// 1106数字类型
+func numberType2() {
+	//十进制
+	var t = 10
+	fmt.Printf("%d\n", t) //
+	fmt.Printf("%b\n", t) //%b二进制
+
+	//八进制
+	var e = 077
+	fmt.Printf("%o\n", e)
+
+	//十六进制
+	var c = 0xff
+	fmt.Printf("%X\n", c)
+
+	fmt.Printf("%f\n", math.Pi)
+	fmt.Printf("%.2f\n", math.Pi)
+
+	//复数类型
+	var d complex64
+	d = 1 + 2i
+	var d2 complex128
+	d2 = 2 + 3i
+	fmt.Println(d)
+	fmt.Println(d2)
+}
+
+func numberType() {
+	var i8 int8
+	var ui8 uint8
+	var f32 float32
+
+	fmt.Println(i8, unsafe.Sizeof(i8), math.MinInt8, math.MaxInt8)
+	println(ui8, unsafe.Sizeof(ui8), math.MaxUint8)
+	println(f32, unsafe.Sizeof(f32), -math.MaxFloat32, math.MaxFloat32)
 }
 
 func stringAdd2() {
