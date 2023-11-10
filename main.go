@@ -3,12 +3,119 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"godaily/user"
 	"math"
 	"strings"
 	"unsafe"
 )
 
+type Website struct {
+	Nmae string
+}
+
 func main() {
+	operatorDemo3()
+}
+
+//算数运算符
+func operatorDemo3() {
+	var num int
+	fmt.Println("请输入一个数字")
+	fmt.Scan(&num)
+
+	if num %2 == 0 {
+		fmt.Println("偶数")
+	} else {
+		fmt.Println("奇数")
+	}
+}
+
+func userDemo() {
+	var user = user.Hello()
+	fmt.Printf("user: %v\n", user)
+}
+
+func operatorDemo2() {
+	var name string = ""
+	var age int
+	var email string
+	fmt.Println("please enter name、age、 email")
+	fmt.Scan(&name, &age, &email)
+	fmt.Printf("name: %v\n", name)
+	fmt.Printf("age: %v\n", age)
+	fmt.Printf("email: %v\n", email)
+}
+
+func operatorDemo() {
+	var a = 100
+	a++
+	fmt.Printf("a: %v\n", a)
+	a--
+	fmt.Printf("a: %v\n", a)
+}
+
+//1110fotmat
+func testFormat()  {
+	var website = Website{ Nmae: "chencan"}
+	fmt.Printf("website: %v\n", website)
+	fmt.Printf("website: %#v\n", website)
+	
+	var number = 10
+	fmt.Printf("number: %T\n", number)
+}
+
+// 1108字符串函数
+func stringFunc() {
+	var str = "HELLO WORLD"
+	var str2 = "chenqingsong"
+	fmt.Printf("%v\n", len(str))
+	fmt.Printf("%v\n", strings.Split(str, " "))
+	fmt.Printf("%v\n", strings.Contains(str, "hello"))
+	fmt.Printf("strings.ToLower(str): %v\n", strings.ToLower(str))
+	fmt.Printf("strings.ToUpper(str2): %v\n", strings.ToUpper(str2))
+	fmt.Printf("strings.HasPrefix(str, \"HELLO\"): %v\n", strings.HasPrefix(str, "HELLO"))
+	fmt.Printf("strings.HasSuffix(str, \"hello\"): %v\n", strings.HasSuffix(str, "hello"))
+	fmt.Printf("strings.Index(str, \"O\"): %v\n", strings.Index(str, "O"))
+	fmt.Printf("strings.LastIndex(str, \"O\"): %v\n", strings.LastIndex(str, "O"))
+}
+
+func demoStr02() {
+	var str = "hello"
+	print(str + "\n")
+
+	var str2 = "chenqingsong"
+	fmt.Println(str2[4:])
+}
+
+func demoStr() {
+	var s = "hello world"
+	var s1 = "chen"
+	s2 := "story"
+	var s4 = `
+	line1
+	line2 
+	lin3
+	`
+	fmt.Printf("%v\n", s)
+	fmt.Printf("%v\n", s1)
+	fmt.Printf("%v\n", s2)
+	fmt.Printf("%v\n", s4)
+}
+
+func stringSplicing() {
+	//字符串拼接
+	var name = "chen"
+	var age = "23"
+	var message = fmt.Sprintf("%s, %s", name, age)
+	fmt.Printf("%s\n", message)
+
+	var message2 = strings.Join([]string{name, age}, " ")
+	fmt.Printf("%s\n", message2)
+
+	var buffer bytes.Buffer
+	buffer.WriteString("hello")
+	buffer.WriteString("world")
+	fmt.Printf("%v\n", buffer.String())
 
 }
 
@@ -91,14 +198,14 @@ func demoIota() {
 	//iota是一个预定义的标识符，用于创建枚举常量序列。
 	//当定义一个枚举类型的常量时，iota会被重置为0，然后每个连续的常量声明都会使iota递增1
 	const (
-		a1 = iota
-		a2 = iota
-		a3 = iota
+		A1 = iota
+		A2 = iota
+		A3 = iota
 		_
-		a4 = iota
+		A4 = iota
 	)
 
-	fmt.Println(a1, a2, a3, a4)
+	fmt.Println(A1, A2, A3, A4)
 }
 
 func constStatement() {
