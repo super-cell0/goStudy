@@ -13,8 +13,290 @@ type Website struct {
 	Nmae string
 }
 
+type Myf func(int, int) int
+
 func main() {
-	sliceCopy()
+	n := 5
+	fibonacci2(n)
+}
+
+func fibonacci(n int) []int {
+	var fib = make([]int, n)
+	fib[0], fib[1] = 0, 1
+
+	for i := 2; i < n; i++ {
+		fib[i] = fib[i-1] + fib[i-2]
+	}
+	return fib
+}
+
+func fibonacci2(n int) {
+	if n <= 0 {
+		return
+	}
+
+	fmt.Print(0, " ")
+	fibonacci(n - 1)
+	fmt.Print(1, " ")
+}
+
+// 斐波那契数列-递归
+func fib(f int) int {
+	if f == 2 || f == 1 {
+		return 1
+	}
+	return fib(f-1) + fib(f-2)
+}
+
+// go 递归recursion
+func recursionDemo2(a int) int {
+	if a == 1 {
+		//结束条件
+		return 1
+	} else {
+		return a * recursionDemo2(a-1)
+	}
+}
+
+// 阶乘
+func recursionDemo1() {
+	var a = 1
+	for i := 1; i <= 10; i++ {
+		a *= i
+	}
+	fmt.Printf("%v\n", a)
+}
+
+// go闭包closure
+func closureAdd() func(y int) int {
+	var x int
+	return func(y int) int {
+		x += y
+		return x
+	}
+}
+
+func closureDemo() {
+	var demo = closureAdd()
+	var demo1 = demo(10)
+	fmt.Printf("%v\n", demo1)
+	demo1 = demo(20)
+	fmt.Printf("%v\n", demo1)
+}
+
+func closureDemo2(base int) (func(a int) int, func(a int) int) {
+	var add = func(a int) int {
+		base += a
+		return base
+	}
+
+	var sub = func(a int) int {
+		base -= a
+		return base
+	}
+	return add, sub
+}
+
+func useClosureDemo2() {
+	var add, sub = closureDemo2(100)
+	var newAdd = add(100)
+	fmt.Printf("%v\n", newAdd)
+
+	var newSub = sub(50)
+	fmt.Printf("%v\n", newSub)
+
+	var add1, sub1 = closureDemo2(100)
+	var newAdd1 = add1(1)
+	fmt.Printf("%v\n", newAdd1)
+	var newSub1 = sub1(2)
+	fmt.Printf("%v\n", newSub1)
+
+}
+
+// go匿名函数
+// 介绍匿名函数的概念和语法格式
+// 匿名函数可以省略函数名称，但不能嵌套函数
+// 匿名函数可以自己调用自己，实现更复杂的功能
+func funcDemo6() {
+	var demo = func(a int, b int) int {
+		if a > b {
+			return a
+		} else {
+			return b
+		}
+	}
+	fmt.Printf("%v\n", demo(5, 9))
+}
+
+// 匿名函数自己调用自己
+func funcDemo7() {
+	var demo = func(a int, b int) int {
+		if a > b {
+			return a
+		} else {
+			return b
+		}
+	}(100, 89)
+	fmt.Printf("%v\n", demo)
+}
+
+// 函数的类型
+func typeAdd(a int, b int) int {
+	return a + b
+}
+
+func typeSub(a int, b int) int {
+	return a - b
+}
+
+// 把函数作为返回值
+func calculateDemo(operator string) func(int, int) int {
+	switch operator {
+	case "+":
+		return typeAdd
+	case "-":
+		return typeSub
+	default:
+		return nil
+	}
+}
+
+func testType() {
+	var demo1 = calculateDemo("+")
+	var demo2 = demo1(34, 22)
+	fmt.Printf("%v\n", demo2)
+	demo1 = calculateDemo("-")
+	var demo3 = demo1(100, 49)
+	fmt.Printf("%v\n", demo3)
+}
+
+func funcType() {
+	var myfunc Myf
+
+	myfunc = sum
+	var demo = myfunc(45, 22)
+	fmt.Printf("%v\n", demo)
+
+	myfunc = maxDemo
+	demo = myfunc(203, 234)
+	fmt.Printf("%v\n", demo)
+}
+
+func sayHello(name string) {
+	fmt.Printf("%v hello world go\n", name)
+}
+
+// 把函数作为参数
+func typeDemo(name string, myf func(string)) {
+	myf(name)
+}
+
+func sum(a int, b int) int {
+	return a + b
+}
+
+func maxDemo(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+// 函数
+// 1.g0语言中有3种函数：普通函数、匿名函数（（没有名称的函数）、方法（定义在struct上的函数）。receiver
+// 2.g0语言中不允许函数重载（overload），也就是说不允许函数同名。
+// 3.g0语言中的函数不能嵌套函数，但可以嵌套匿名函数。
+// 4.函数是一个值，可以将函数赋值给变量，使得这个变量也成为函数。
+// 5.函数可以作为参数传递给另一个函数。
+// 6.函数的返回值可以是一个函数。
+// 7，函数调用的时候，如果有参数传递给函数，则先拷贝参数的副本，再将副本传递给函数。
+// 8，函数参数可以没有名称
+func funcDemo(a int, b int) (ret int) {
+	ret = a + b
+	return ret
+}
+
+func funcDemo2() (n string, a int) {
+	n = "chen"
+	a = 34
+	return n, a
+}
+
+func funcDemo3(s []int) {
+	s[0] = 89
+	//var demo = []int{3, 5, 3, 3}
+	//funcDemo3(demo)
+	//fmt.Printf("%v\n", demo)
+}
+
+// 可变参数
+func funcDemo4(args ...int) {
+	for _, arg := range args {
+		fmt.Printf("%v\n", arg)
+	}
+}
+
+func funcDemo5(name string, age int, args ...int) {
+	fmt.Printf("%v\n", name)
+	fmt.Printf("%v\n", age)
+	for _, arg := range args {
+		fmt.Printf("%v\n", arg)
+	}
+}
+
+// map
+// map是一种key:value键值对的数据结构容器。map内部实现是哈希表（hash）
+// map最重要的一点是通过key来快速检索数据，key类似于索引，指向数据
+// map是引用类型
+// map无序
+func mapDemo5() {
+	var m1 = map[string]string{"name": "chen", "age": "23", "email": "239@qq.com"}
+
+	for k, v := range m1 {
+		fmt.Printf("%v: %v\n", k, v)
+	}
+
+	for k := range m1 {
+		fmt.Printf("%v\n", k)
+	}
+}
+
+func mapDemo4() {
+	var m1 = map[string]string{"name": "chen", "age": "23", "email": "239@qq.com"}
+	var key1 = "email"
+	var key2 = "nama"
+	var v, ok = m1[key1]
+	fmt.Printf("%v\n", v)
+	fmt.Printf("%v\n", ok)
+	v, ok = m1[key2]
+	fmt.Printf("%v\n", v)
+	fmt.Printf("%v\n", ok)
+}
+
+func mapDemo3() {
+	var m1 = map[string]string{"name": "chen", "age": "23", "email": "239@qq.com"}
+	var value = m1["email"]
+	fmt.Printf("%v\n", value)
+}
+
+func mapDemo() {
+	//类型的声明
+	var m1 map[string]string
+	m1 = make(map[string]string)
+	fmt.Printf("%v\n", m1)
+	fmt.Printf("%T\n", m1)
+}
+
+func mapDemo2() {
+	var m1 = map[string]string{"name": "chen", "age": "23", "email": "289@qq.com"}
+	fmt.Printf("%v\n", m1)
+
+	var m2 = make(map[string]string)
+	m2["name"] = "liu"
+	m2["age"] = "23"
+	m2["eamil"] = "233@qq.com"
+	fmt.Printf("%v\n", m2)
 }
 
 // sliceCopy
@@ -354,7 +636,6 @@ func operatorDemo5() {
 	} else {
 		fmt.Println("输入的是其他单词")
 	}
-
 }
 
 func operatorDemo4() {
@@ -366,7 +647,6 @@ func operatorDemo4() {
 	} else {
 		fmt.Println("A")
 	}
-
 }
 
 func operatorDemo3() {
@@ -467,7 +747,6 @@ func stringSplicing() {
 	buffer.WriteString("hello")
 	buffer.WriteString("world")
 	fmt.Printf("%v\n", buffer.String())
-
 }
 
 // 1106数字类型
@@ -484,7 +763,6 @@ func numberType2() {
 	//十六进制
 	var c = 0xff
 	fmt.Printf("%X\n", c)
-
 	fmt.Printf("%f\n", math.Pi)
 	fmt.Printf("%.2f\n", math.Pi)
 
@@ -508,7 +786,6 @@ func numberType() {
 }
 
 func stringAdd2() {
-
 	var buffer bytes.Buffer
 	buffer.WriteString("Tom")
 	buffer.WriteString(" what's up")
@@ -553,15 +830,13 @@ func demoIota() {
 		A2 = iota
 		A3 = iota
 		_
-		A4 = iota
+		A4 int = iota
 	)
-
 	fmt.Println(A1, A2, A3, A4)
 }
 
 func constStatement() {
 	const PI float64 = 3.1415
-
 	fmt.Println(PI)
 }
 
@@ -588,7 +863,6 @@ func varStatement() {
 		age    int
 		gender string
 	)
-
 	name = "chen"
 	age = 24
 	gender = "男"
