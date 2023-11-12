@@ -16,8 +16,116 @@ type Website struct {
 type Myf func(int, int) int
 
 func main() {
-	n := 5
-	fibonacci2(n)
+	structDemo2()
+}
+
+// go定义结构体
+type Person struct {
+	id    int
+	name  string
+	age   int
+	email string
+}
+
+func structDemo1() {
+	var tom Person
+	tom.id = 1010
+	tom.name = "beidixiaoxiong"
+	tom.age = 43
+	tom.email = "2334@qq.com"
+	fmt.Printf("%v\n", tom)
+}
+
+// 匿名结构体
+func structDemo2() {
+	var tom struct {
+		id   int
+		name string
+	}
+	tom.id = 3043
+	tom.name = "beidixiaoxiong"
+	fmt.Printf("%v\n", tom)
+}
+
+// 类型定义&类型别名
+func typeDemo1() {
+	//类型定义
+	type MyInt int
+	var age MyInt
+	age = 89
+	fmt.Printf("%T %v\n", age, age)
+
+	//类型别名
+	type MyString = string
+	var name MyString
+	name = "beidixiaoxiong"
+	fmt.Printf("%T %v\n", name, name)
+}
+
+// Go语言中的函数传参都是值拷贝，当我们想要修改某个变量的时候，我们可以创建一个指向该变量地址的指针变 量。传递数据使用指针，而无须拷贝数据。
+// 类型指针不能进行偏移和运算。
+// Go语言中的指针操作非常简单，只需要记住两个符号：&（取地址）積*（根据地址取值）
+func pointDemo1() {
+	var ip *int
+	fmt.Printf("%v\n", ip)
+
+	var i = 100
+	ip = &i
+	//取地址
+	fmt.Printf("%v\n", ip)
+	//取值
+	fmt.Printf("%v\n", *ip)
+
+	var strP *string
+	var str = "beidiixaoxiong"
+	strP = &str
+	fmt.Printf("%v\n", strP)
+	fmt.Printf("%v\n", *strP)
+}
+
+func pointDemo2() {
+	var array = [...]int{1, 2, 4}
+	var arrayPoint [3]*int
+	fmt.Printf("%v\n", arrayPoint)
+
+	for i := 0; i < len(array); i++ {
+		arrayPoint[i] = &array[i]
+	}
+	fmt.Printf("%v\n", arrayPoint)
+
+	for i := 0; i < len(arrayPoint); i++ {
+		fmt.Printf("%v\n", *arrayPoint[i])
+	}
+}
+
+// golang有一个特殊的函数init函数，先于main函数执行，实现包级别的一些初始化操作。
+// init函数先于main函数自动执行，不能被其他函数调用；
+// init函数没有输入参数、返回值；
+// 每个包可以有多个init函数；
+// 包的每个源文件也可以有多个init函数，这点比较特殊；
+// 同一个包的init执行顺序，golang没有明确定义，编程时要注意程序不要依赖这个执行顺序。
+// 不同包的init函数按照包导入的依赖关系决定执行顺序。
+//func init() {
+//	fmt.Printf("init...\n")
+//}
+//
+////var demoInitVar = initVar()
+//
+//func initVar() int {
+//	fmt.Printf("init var...\n")
+//	return 100
+//}
+
+// defer
+// go语言中的defer语句会将其后面跟随的语句进行延迟处理。
+// 在defer归属的函数即将返回时，将延迟处理的语 句按defer定义的逆序进行执行
+// ，也就是说，先被defer的语句最后被执行，最后被defer的语句，最先被执 行。stack
+func deferDemo() {
+	fmt.Printf("start\n")
+	defer fmt.Printf("start 01\n")
+	defer fmt.Printf("start 02\n")
+	defer fmt.Printf("start 03\n")
+	fmt.Printf("END\n")
 }
 
 func fibonacci(n int) []int {
@@ -28,16 +136,6 @@ func fibonacci(n int) []int {
 		fib[i] = fib[i-1] + fib[i-2]
 	}
 	return fib
-}
-
-func fibonacci2(n int) {
-	if n <= 0 {
-		return
-	}
-
-	fmt.Print(0, " ")
-	fibonacci(n - 1)
-	fmt.Print(1, " ")
 }
 
 // 斐波那契数列-递归
