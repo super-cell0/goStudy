@@ -9,15 +9,241 @@ import (
 	"unsafe"
 )
 
+func main() {
+	testShowPerson2()
+}
+
+// 结构体实例，有值类型和指针类型，那么方法的接收者是结构体，那么也有值类型和指针类型。区别就是接收者是
+// 否复制结构体副本。值类型复制，指针类型不复制
+
+type Person02 struct {
+	name string
+}
+
+func methodDemo1() {
+	var p1 = Person02{
+		name: "chen",
+	}
+	var p2 = &Person02{
+		name: "chen",
+	}
+	fmt.Printf("p1: %T\n", p1)
+	fmt.Printf("p2: %T\n", p2)
+}
+
+func showPerson3(person Person02) {
+	person.name = "liu值类型"
+}
+
+func showPerson4(person *Person02) {
+	//自动解引用
+	person.name = "chen指针类型"
+}
+
+func showPersonTest() {
+	var p1 = Person02{
+		name: "值类型",
+	}
+	var p2 = &Person02{
+		name: "指针类型",
+	}
+	showPerson3(p1)
+	fmt.Printf("%v\n", p1)
+	showPerson4(p2)
+	fmt.Printf("%v\n", *p2)
+
+}
+
+func (per Person02) showPerson5() {
+	per.name = "liu值类型"
+}
+
+func (per *Person02) showPerson6() {
+	per.name = "chen指针类型"
+}
+
+func testShowPerson2() {
+	var p1 = Person02{
+		name: "这个值类型不能改变",
+	}
+	var p2 = &Person02{
+		name: "这是指针类型可以改变",
+	}
+
+	p1.showPerson5()
+	fmt.Printf("%v\n", p1)
+	p2.showPerson6()
+	fmt.Printf("%v\n", *p2)
+}
+
+// 方法的receivertype并非一定要是struct类型，type定义的类型别名、slice、map、channel、func类型等都可以
+// struct结合它的方法就等价于面向对象中的类。只不过struct可以和它的方法分开，并非一定要属于同一个文件，但必须属于同一个包
+// 方法有两种接收类型：（TType）和（T*Type），它们之间有区别
+// 方法就是函数，所以Go中没有方法重载（overload）的说法，也就是说同一个类型中的所有方法名必须都唯一
+// 如果receiver是一个指针类型，则会自动解除引用
+// 方法和type是分开的，意味着实例的行为（behavior）和数据存储（field）是分开的，但是它们通过receiver建立起关联关系
+func loginDemo() {
+	var customer = Customer{
+		password: "1234",
+	}
+	var cus = customer.login("chen", "1234")
+	fmt.Printf("%v\n", cus)
+}
+
+type Customer struct {
+	password string
+}
+
+func (customer Customer) login(name string, password string) bool {
+	fmt.Printf("%v\n", customer.password)
+	if name == "chen" && password == "1234" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func eatDemo() {
+	var per = Person01{
+		id: 89,
+	}
+	per.eat()
+}
+
+type Person01 struct {
+	id int
+}
+
+// receiver
+func (per Person01) eat() {
+	fmt.Printf("%v\n", per.id)
+}
+
+func structNest() {
+	type Dog struct {
+		name  string
+		color string
+	}
+
+	type Person struct {
+		name string
+		id   int
+		dog  Dog
+	}
+
+	var myDog = Dog{
+		name:  "tt",
+		color: "black",
+	}
+
+	var per = Person{
+		id:   1001,
+		name: "chen",
+		dog:  myDog,
+	}
+	fmt.Printf("%v\n", per.dog.name)
+	fmt.Printf("%v\n", per)
+}
+
+func showDemo2() {
+	var tom = Person{
+		id:    3333,
+		name:  "new",
+		age:   33,
+		email: "new@qq.com",
+	}
+	var per = &tom
+	fmt.Printf("tom: %v\n", per)
+	fmt.Printf("------------------\n")
+	showPerson2(per)
+	fmt.Printf("showPerson2(per): %v\n", per)
+}
+
+// 传递结构体指轩，这时在函数内部，能够改变外部结构体内容
+func showPerson2(per *Person) {
+	per.id = 2222
+	per.name = "old"
+	per.age = 22
+	per.email = "old@qq.com"
+	fmt.Printf("%v\n", per)
+}
+
+func showDemo1() {
+	var tom = Person{
+		id:    2222,
+		name:  "new",
+		age:   22,
+		email: "new@qq.com",
+	}
+	fmt.Printf("tom: %v\n", tom)
+	fmt.Printf("-------------------\n")
+	showPerson(tom)
+	fmt.Printf("showPerson(tom): %v\n", tom)
+}
+
+// 直接传递结构体，这是是一个副本（拷贝），在函数内部不会改变外面结构内容
+func showPerson(person Person) {
+	person.id = 1111
+	person.name = "old"
+	person.email = "old@qq.com"
+	person.age = 11
+	fmt.Printf("%v\n", person)
+}
+
+// 用new创建结构体指针
+func newStruct() {
+	type Person struct {
+		id   int
+		name string
+	}
+
+	var tom = new(Person)
+	tom.id = 1101
+	tom.name = "tom"
+
+	fmt.Printf("%p\n", tom)
+	fmt.Printf("%v\n", *tom)
+}
+
+func structPoint1() {
+	type Person struct {
+		id   int
+		name string
+		age  int
+	}
+
+	var tom = Person{
+		id:   10201,
+		name: "tom",
+		age:  34,
+	}
+
+	var point_person *Person
+	point_person = &tom
+
+	fmt.Printf("%v\n", tom)
+	fmt.Printf("%p\n", point_person)
+	fmt.Printf("%v\n", *point_person)
+
+}
+
+// 结构体指针
+func pointStruct() {
+	var name string
+	name = "tom"
+	var point_name *string
+	point_name = &name
+	fmt.Printf("%v\n", name)
+	fmt.Printf("%v\n", point_name)
+	fmt.Printf("%v\n", *point_name)
+
+}
+
 type Website struct {
 	Nmae string
 }
 
 type Myf func(int, int) int
-
-func main() {
-	structDemo2()
-}
 
 // go定义结构体
 type Person struct {
@@ -62,7 +288,7 @@ func typeDemo1() {
 	fmt.Printf("%T %v\n", name, name)
 }
 
-// Go语言中的函数传参都是值拷贝，当我们想要修改某个变量的时候，我们可以创建一个指向该变量地址的指针变 量。传递数据使用指针，而无须拷贝数据。
+// Go语言中的函数传参都是值拷贝，当我们想要修改某个变量的时候，我们可以创建一个指向该变量地址的指针变量。传递数据使用指针，而无须拷贝数据。
 // 类型指针不能进行偏移和运算。
 // Go语言中的指针操作非常简单，只需要记住两个符号：&（取地址）積*（根据地址取值）
 func pointDemo1() {
