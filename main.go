@@ -10,7 +10,165 @@ import (
 )
 
 func main() {
-	testFish()
+	testPerson05()
+}
+
+// Person05 构造方法
+type Person05 struct {
+	name string
+	age  int
+}
+
+func newPerson05(name string, age int) (*Person05, error) {
+	if name == "" {
+		return nil, fmt.Errorf("name can not be empty")
+	}
+	if age <= 0 {
+		return nil, fmt.Errorf("age cannot be 0")
+	}
+	return &Person05{name: name, age: age}, nil
+}
+
+func testPerson05() {
+	var person, myError = newPerson05("Tom", 34)
+	if myError == nil {
+		fmt.Printf("%v\n", *person)
+	} else {
+		fmt.Printf("%v\n", myError)
+	}
+}
+
+// Animal
+// golang本质上没有oop的概念，也没有继承的概念，但是可以通过结构体嵌套实现这个特性。
+type Animal struct {
+	name string
+	age  int
+}
+
+func (animal Animal) eat01() {
+	fmt.Println("eat...")
+}
+
+func (animal Animal) sleep01() {
+	fmt.Println("sleep...")
+}
+
+type Dog01 struct {
+	animal Animal
+	color  string
+}
+
+type Cat01 struct {
+	animal Animal
+	breed  string
+}
+
+func testAnimal() {
+	var dog = Dog01{
+		animal: Animal{
+			name: "pp",
+			age:  34,
+		},
+		color: "gray",
+	}
+	dog.animal.eat01()
+	dog.animal.sleep01()
+	fmt.Printf("%v\n", dog.animal.name)
+	fmt.Printf("%v\n", dog.animal.age)
+}
+
+func testAnimal01() {
+	var cat = Cat01{
+		animal: Animal{
+			name: "xiaomao",
+			age:  3,
+		},
+		breed: "lan",
+	}
+	cat.animal.eat01()
+	cat.animal.sleep01()
+}
+
+// Person04 oop
+type Person04 struct {
+	name string
+	age  int
+}
+
+func (person Person04) eat() {
+	fmt.Printf("eat...\n")
+}
+
+func (person Person04) sleep() {
+	fmt.Printf("sleep...\n")
+}
+
+func (person Person04) work() {
+	fmt.Printf("work...\n")
+}
+
+func testPerson04() {
+	var person = Person04{
+		name: "chen",
+		age:  20,
+	}
+	fmt.Printf("%v\n", person)
+	person.eat()
+	person.sleep()
+	person.work()
+}
+
+// PetNew opp
+// golang没有面向对象的概念，也没有封装的概念，但是可以通过结构体struct和函数绑定来实现0OP的属性和方
+// 法等特性。援收者receiver方法。
+// 定义一个宠物接口
+type PetNew interface {
+	eat()
+	sleep()
+}
+
+// Pig 定义pig结构体
+type Pig struct {
+}
+
+// Cat 定义cat结构体
+type Cat struct {
+}
+
+// pig实现PetNew接口方法
+func (pig Pig) eat() {
+	fmt.Println("pig eat...\n")
+}
+
+func (pig Pig) sleep() {
+	fmt.Println("pig sleep...\n")
+}
+
+// cat实现PetNew接口方法
+func (cat Cat) eat() {
+	fmt.Printf("cat eat...\n")
+}
+
+func (cat Cat) sleep() {
+	fmt.Printf("cat sleep...\n")
+}
+
+// Person03 定义一个person结构体
+type Person03 struct {
+}
+
+// 为person添加一个养宠物的方法
+func (person Person03) care(pet PetNew) {
+	pet.eat()
+	pet.sleep()
+}
+
+func testPetNew() {
+	var pig = Pig{}
+	var cat = Cat{}
+	var person = Person03{}
+	person.care(pig)
+	person.care(cat)
 }
 
 // Fly 接口嵌套
@@ -22,25 +180,24 @@ type Swim interface {
 	swim()
 }
 
-// FlyAndSwim 接口的组合
-type FlyAndSwim interface {
+// FlyFish 接口的组合
+type FlyFish interface {
 	Fly
 	Swim
 }
 
-type Fish struct {
-}
+type Fish struct{}
 
 func (f Fish) fly() {
-	fmt.Printf("fly\n")
+	fmt.Println("fly...\n")
 }
 
 func (f Fish) swim() {
-	fmt.Printf("swim\n")
+	fmt.Println("swim...\n")
 }
 
 func testFish() {
-	var ff FlyAndSwim
+	var ff FlyFish
 	ff = Fish{}
 	ff.fly()
 	ff.swim()
@@ -163,9 +320,8 @@ func testInterface() {
 	c.write()
 }
 
-// 结构体实例，有值类型和指针类型，那么方法的接收者是结构体，那么也有值类型和指针类型。区别就是接收者是
+// Person02 结构体实例，有值类型和指针类型，那么方法的接收者是结构体，那么也有值类型和指针类型。区别就是接收者是
 // 否复制结构体副本。值类型复制，指针类型不复制
-
 type Person02 struct {
 	name string
 }
