@@ -10,7 +10,157 @@ import (
 )
 
 func main() {
-	testShowPerson2()
+	testFish()
+}
+
+// Fly 接口嵌套
+type Fly interface {
+	fly()
+}
+
+type Swim interface {
+	swim()
+}
+
+// FlyAndSwim 接口的组合
+type FlyAndSwim interface {
+	Fly
+	Swim
+}
+
+type Fish struct {
+}
+
+func (f Fish) fly() {
+	fmt.Printf("fly\n")
+}
+
+func (f Fish) swim() {
+	fmt.Printf("swim\n")
+}
+
+func testFish() {
+	var ff FlyAndSwim
+	ff = Fish{}
+	ff.fly()
+	ff.swim()
+}
+
+// Music 一个类型可以实现多个接口
+type Music interface {
+	playerMusic()
+}
+
+type Video interface {
+	playerVideo()
+}
+
+type Mobile02 struct {
+	id int
+}
+
+func (m Mobile02) playerMusic() {
+	fmt.Printf(": playerMusic\n")
+}
+
+func (m Mobile02) playerVideo() {
+	fmt.Printf(": playerVideo\n")
+}
+
+func testMobile02() {
+	var m = Mobile02{
+		id: 110,
+	}
+
+	m.playerMusic()
+	m.playerVideo()
+}
+
+// Pet02 多个类型可以实现同一个接口（多态）
+type Pet02 interface {
+	eat02()
+}
+
+type Dog02 struct {
+}
+
+type Cat02 struct {
+}
+
+func (d Dog02) eat02() {
+	fmt.Printf("吃东西\n")
+}
+
+func (c Cat02) eat02() {
+	fmt.Printf("猫吃东西\n")
+}
+
+func testPet02() {
+	var pet Pet02
+	pet = Dog02{}
+	pet = Cat02{}
+	pet.eat02()
+	pet.eat02()
+}
+
+// Pet 本质上和方法的值类型接收者和指针类型接收者，的思考方法是一样的，值接收者是一个拷贝，是一个
+// 副本，而指针接收者，传递的是指针。
+type Pet interface {
+	eat(name string) string
+}
+
+type Dog struct {
+	name string
+}
+
+func (d *Dog) eat(name string) string {
+	d.name = "1 花花..."
+	fmt.Printf("%v\n", name)
+	return "OK"
+}
+
+func testEat() {
+	var dog = &Dog{
+		name: "草草",
+	}
+	var newEat = dog.eat("新的花花")
+	fmt.Printf("2 %v\n", newEat)
+	fmt.Printf("3 %v\n", &dog)
+}
+
+// go语言的接口，是一种新的类型走义，它把所有的具有共性的方法定义在一起，任何其他类型只要实现了这些方
+// 法就是实现了这个接口。
+// 语法格式和方法非常类似。
+type interfaceDemo1 interface {
+	read()
+	write()
+}
+
+type Computer struct {
+	id int
+}
+
+type Mobile struct {
+	model string
+}
+
+func (c Computer) read() {
+	fmt.Printf("%v\n", c.id)
+	fmt.Printf("read...\n")
+}
+
+func (c Computer) write() {
+	fmt.Printf("%v\n", c.id)
+	fmt.Printf("write...\n")
+}
+
+func testInterface() {
+	var c = Computer{
+		id: 1001,
+	}
+
+	c.read()
+	c.write()
 }
 
 // 结构体实例，有值类型和指针类型，那么方法的接收者是结构体，那么也有值类型和指针类型。区别就是接收者是
