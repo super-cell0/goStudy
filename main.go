@@ -263,7 +263,7 @@ func send() {
 	var value = random.Intn(10)
 	fmt.Printf("send: %v\n", value)
 	time.Sleep(time.Second * 5)
-	export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 <- value
+	values <- value
 
 }
 
