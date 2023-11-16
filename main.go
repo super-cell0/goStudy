@@ -7,14 +7,228 @@ import (
 	"io"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
+	"runtime"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 )
 
 func main() {
-	testResponseSize()
+	timerDemo1()
+}
+
+// Timer
+func timerDemo1() {
+	timer := time.NewTimer(time.Second * 2)
+	fmt.Printf("timer: %v\n", time.Now())
+	timer01 := <-timer.C //阻塞的 知道时间到了
+	fmt.Printf("%v\n", timer01)
+}
+
+func timerDemo2() {
+	fmt.Printf("timer: %v\n", time.Now())
+	var timer = time.NewTimer(time.Second * 2)
+	<-timer.C
+	fmt.Printf("timerNow: %v\n", time.Now())
+}
+
+func timerDemo3() {
+	<-time.After(time.Second * 2)
+	fmt.Printf("time now\n")
+}
+
+func timeDemo4() {
+	var timer = time.NewTimer(time.Second)
+	go func() {
+		<-timer.C
+		fmt.Printf("func...\n")
+	}()
+	var stopOne = timer.Stop()
+	if stopOne {
+		fmt.Printf("stopOne...\n")
+	}
+	time.Sleep(time.Second * 3)
+	fmt.Printf("main end...\n")
+}
+
+func timeDemo05() {
+	fmt.Printf("before\n")
+	var timer = time.NewTimer(time.Second * 5) //原来设置5s
+	timer.Reset(time.Second * 1)               //从新设置时间， 即修改newTimer的时间
+	<-timer.C
+	fmt.Printf("after\n")
+}
+
+// 1．select是Go中的一个控制结构，类似于switch语句，用于处理异步IO操作。select会监听case语句中
+// channel的读写操作，当case中channel读写操作为非阻塞状态（即能读写）时，将会触发相应的动作。
+// select中的case语句必须是一个channel操作
+// select中的default子句总是可运行的。
+// 2．如果有多个case都可以运行，select会随机公平地选出一个执行，其他不会执行。
+// 3.如果没有可运行的case语句，且有default语句，那么就会执行default的动作。
+// 4.如果没有可运行的case语句，目没有default语句，select将阻塞，直到某个case通信可以运行
+var chanInt = make(chan int, 0)
+var chanString = make(chan string)
+
+func selectDemo() {
+	go func() {
+		chanInt <- 100
+		chanString <- "hello go"
+		defer close(chanInt)
+		defer close(chanString)
+	}()
+
+	for {
+		select {
+		case v := <-chanInt:
+			fmt.Printf("chanInt: %v\n", v)
+		case v := <-chanString:
+			fmt.Printf("chanString: %v\n", v)
+		default:
+			fmt.Printf("default...\n")
+		}
+		time.Sleep(time.Second)
+	}
+}
+
+// chan 循环
+var chanValue = make(chan int)
+
+func chanDemo1() {
+	go func() {
+		for i := 0; i < 2; i++ {
+			chanValue <- i
+		}
+		close(chanValue)
+	}()
+
+	//var newValue = <-chanValue
+	//fmt.Printf("%v\n", newValue)
+	//newValue = <-chanValue
+	//fmt.Printf("%v\n", newValue)
+
+	//只有两个值但是读到第三个值的时候会发送死锁
+	//for i := 0; i < 3; i++ {
+	//	var newValue = <-chanValue
+	//	fmt.Printf("%v\n", newValue)
+	//
+	//}
+
+	for i2 := range chanValue {
+		fmt.Printf("%v\n", i2)
+	}
+
+	//for {
+	//	value, ok := <-chanValue
+	//	if ok {
+	//		fmt.Printf("%v\n", value)
+	//	} else {
+	//		break
+	//	}
+	//}
+}
+
+// golang并发编程之Mutex互斥锁实现同步
+var a = 100
+var waitg1 sync.WaitGroup
+var lock sync.Mutex
+
+func add() {
+	defer waitg1.Done()
+	lock.Lock()
+	a += 1
+	fmt.Printf("%v\n", a)
+	time.Sleep(time.Millisecond * 10)
+	lock.Unlock()
+}
+
+func sub() {
+	lock.Lock()
+	time.Sleep(time.Millisecond * 2)
+	defer waitg1.Done()
+	a -= 1
+	fmt.Printf("%v\n", a)
+	lock.Unlock()
+
+}
+
+func testAdd() {
+	for i := 0; i < 100; i++ {
+		waitg1.Add(1)
+		add()
+		waitg1.Add(1)
+		sub()
+	}
+
+	waitg1.Wait()
+
+	fmt.Printf("end...: %v\n", a)
+}
+
+// GOMAXPROCS
+func sendA() {
+	for i := 0; i < 10; i++ {
+		fmt.Printf("A: %v\n", i)
+	}
+}
+
+func sendB() {
+	for i := 0; i < 10; i++ {
+		fmt.Printf("B: %v\n", i)
+	}
+}
+
+func testSendAB() {
+	fmt.Printf("numCPU: %v\n", runtime.NumCPU())
+	runtime.GOMAXPROCS(2)
+	go sendA()
+	go sendB()
+	time.Sleep(time.Second)
+}
+
+// runtime.Goexit()
+func showGoexit() {
+	for i := 0; i < 10; i++ {
+		fmt.Printf("%v\n", i)
+		if i >= 5 {
+			runtime.Goexit()
+		}
+	}
+}
+
+// runtime Gosched
+func showMessage(message string) {
+	for i := 0; i < 2; i++ {
+		fmt.Printf("%v\n", message)
+	}
+}
+
+func testShowMessage() {
+	go showMessage("golang") //子协程
+	for i := 0; i < 2; i++ {
+		runtime.Gosched()
+		fmt.Printf("%v\n", "gosched")
+	}
+	fmt.Printf("main golang\n")
+}
+
+var wp sync.WaitGroup
+
+func sendMessage(i int) {
+	defer wp.Done()
+	fmt.Printf("hello goroutine %v\n", i)
+}
+
+func testSendMsg() {
+	for i := 0; i < 5; i++ {
+		go sendMessage(i)
+		wp.Add(1)
+	}
+
+	wp.Wait()
+	fmt.Printf("end...\n")
 }
 
 // Go提供了一种称为通道的机制，用于在goroutine之间共享数据。当您作为goroutine执行并发活动时，需要
@@ -25,9 +239,43 @@ func main() {
 // 无缓冲通道保证在发送和接收发生的瞬间执行两个goroutine之间的交换。缓
 // 冲通道没有这样的保证。
 // 通道由make函数创建，该函数指定chan关键字和通道的元素类型。
+// 这是将值发送到通道的代码块需要使用 <- 运算符：
+// <- 运算符附加到通道变量goroutine的左侧，以接收来自通道的值
+// 无缓冲通道
+// 在无缓冲通道中，在接收到任何值之前没有能力保存它。在这种类型的通道中，发送和接收goroutine在任何发送
+// 或接收操作完成之前的同一时刻都准备就绪。如果两个goroutine没有在同一时刻准备好，则通道会让执行其各自
+// 发送或接收操作的goroutine首先等待。同步是通道上发送和接收之间交互的基础。没有另一个就不可能发生。
+// Golang中的并发是函数相互独立运行的能力。Goroutines是并发运行的函数。Golang提供了Goroutines作为并发 处理操作的一种方式
+// 缓冲通道
+// 在缓冲通道中，有能力在接收到一个或多个值之前保存它们。在这种类型的通道中，不要强制goroutine在同一时 刻准备好执行发送和接收。
+// 当发送或接收阳塞时也有不同的条件。只有当通道中没有要接收的值时，接收才会阻
+// 塞。仅当没有可用缓冲区来放置正在发送的值时，发送才会阻塞。
+// 通道的发送和接收特性
+// 1．对于同一个通道，发送操作之间是互斥的，接收操作之间也是互斥的。
+// 2．发送操作和接收操作中对元素值的处理都是不可分割的。
+// 3，发送操作在完全完成之前会被阻塞。接收操作也是如此
+var values = make(chan int)
 
-// Golang中的并发是函数相互独立运行的能力。Goroutines是并发运行的函数。Golang提供了Goroutines作为并发
-// 处理操作的一种方式
+func send() {
+	source := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(source)
+
+	var value = random.Intn(10)
+	fmt.Printf("send: %v\n", value)
+	time.Sleep(time.Second * 5)
+	export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 <- value
+
+}
+
+func testSend() {
+	defer close(values)
+	go send()
+	fmt.Printf("wait...\n")
+	var value = <-values
+	fmt.Printf("recieve: %v\n", value)
+	fmt.Printf("end...\n")
+}
+
 // 协程
 func show(message string) {
 	for i := 0; i < 5; i++ {
