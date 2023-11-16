@@ -4,13 +4,100 @@ import (
 	"bytes"
 	"fmt"
 	"godaily/user"
+	"io"
+	"log"
 	"math"
+	"net/http"
 	"strings"
+	"time"
 	"unsafe"
 )
 
 func main() {
-	testPerson05()
+	testResponseSize()
+}
+
+// Go提供了一种称为通道的机制，用于在goroutine之间共享数据。当您作为goroutine执行并发活动时，需要
+// 在goroutine之间共享资源或数据，通道充当goroutine之间的管道（管道）并提供一种机制来保证同步交换。
+// 需要在声明通道时指定数据类型。我们可以共享内置、命名、结构和引用类型的值和指针。数据在通道上传递：在
+// 任何给定时间只有一个goroutine可以访问数据项：因此按照设计不会发生数据竞争。
+// 根据数据交换的行为，有两种类型的通道：无缓冲通道和缓冲通道。无缓冲通道用于执行goroutine之间的同步通 信，而缓冲通道用于执行异步通信。
+// 无缓冲通道保证在发送和接收发生的瞬间执行两个goroutine之间的交换。缓
+// 冲通道没有这样的保证。
+// 通道由make函数创建，该函数指定chan关键字和通道的元素类型。
+
+// Golang中的并发是函数相互独立运行的能力。Goroutines是并发运行的函数。Golang提供了Goroutines作为并发
+// 处理操作的一种方式
+// 协程
+func show(message string) {
+	for i := 0; i < 5; i++ {
+		fmt.Printf("%v\n", message)
+		time.Sleep(time.Millisecond * 100)
+	}
+}
+
+func testShow() {
+	////启动一个协程来执行
+	go show("hello go")
+	go show("golang...")
+	time.Sleep(time.Millisecond * 2000)
+	fmt.Printf("this is golang\n")
+}
+
+func responseSize(url string) {
+	fmt.Printf("step1: %v\n", url)
+	var response, err = http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("step2: %v\n", url)
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(response.Body)
+
+	fmt.Printf("step3: %v\n", url)
+	var body, err01 = io.ReadAll(response.Body)
+	if err01 != nil {
+		log.Fatal(err01)
+	}
+	fmt.Printf("step4: %v\n", len(body))
+}
+
+func responseSize01(url string) {
+	fmt.Printf("step1: %v\n", url)
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	response, err := client.Get(url)
+	if err != nil {
+		log.Println("Error making GET request:", err)
+		return
+	}
+	defer response.Body.Close()
+
+	fmt.Printf("step2: %v\n", url)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Println("Error reading response body:", err)
+		return
+	}
+
+	fmt.Printf("step3: %v\n", url)
+	fmt.Printf("step4: %v\n", len(body))
+}
+
+func testResponseSize() {
+	go responseSize("https://www.duoke360.com")
+	go responseSize("https://baidu.com")
+	go responseSize("https://jd.com")
+	time.Sleep(10 * time.Second)
 }
 
 // Person05 构造方法
@@ -186,7 +273,8 @@ type FlyFish interface {
 	Swim
 }
 
-type Fish struct{}
+type Fish struct {
+}
 
 func (f Fish) fly() {
 	fmt.Println("fly...\n")
