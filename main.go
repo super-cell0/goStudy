@@ -16,10 +16,6 @@ import (
 	"unsafe"
 )
 
-func main() {
-	timerDemo1()
-}
-
 // Timer
 func timerDemo1() {
 	timer := time.NewTimer(time.Second * 2)
@@ -1841,4 +1837,8 @@ func varStatement() {
 
 func getNameAndAge() (string, int) {
 	return "chen", 24
+}
+
+func main() {
+	timerDemo1()
 }
