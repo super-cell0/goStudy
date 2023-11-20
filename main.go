@@ -9,9 +9,11 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 	"unsafe"
 )
@@ -468,11 +470,11 @@ type Cat struct {
 
 // pig实现PetNew接口方法
 func (pig Pig) eat() {
-	fmt.Println("pig eat...\n")
+	fmt.Printf("pig eat...\n")
 }
 
 func (pig Pig) sleep() {
-	fmt.Println("pig sleep...\n")
+	fmt.Printf("pig sleep...\n")
 }
 
 // cat实现PetNew接口方法
@@ -521,11 +523,11 @@ type Fish struct {
 }
 
 func (f Fish) fly() {
-	fmt.Println("fly...\n")
+	fmt.Printf("fly...\n")
 }
 
 func (f Fish) swim() {
-	fmt.Println("swim...\n")
+	fmt.Printf("swim...\n")
 }
 
 func testFish() {
@@ -1839,6 +1841,207 @@ func getNameAndAge() (string, int) {
 	return "chen", 24
 }
 
+// ticker
+// Timer只执行一次，Ticker可以周期的执行。
+func tickerDemo1() {
+	var ticker = time.NewTicker(time.Second)
+	var counter = 1
+	for range ticker.C {
+		fmt.Printf("ticker...\n")
+		counter++
+		if counter >= 5 {
+			ticker.Stop()
+			break
+		}
+	}
+}
+
+func tickerDemo2() {
+	var ticker = time.NewTicker(time.Second)
+	var chans = make(chan int)
+
+	go func() {
+		for range ticker.C {
+			select {
+			case chans <- 1:
+			case chans <- 2:
+			case chans <- 3:
+			}
+		}
+	}()
+
+	sum := 0
+	for v := range chans {
+		fmt.Printf("v: %v\n", v)
+		sum += v
+		if sum >= 10 {
+			break
+		}
+	}
+}
+
+// 原子变量
+var atomValue = 100
+
+func add1() {
+	lock.Lock()
+	atomValue++
+	lock.Unlock()
+}
+
+func sub1() {
+	lock.Lock()
+	atomValue--
+	lock.Unlock()
+}
+
+func testAtom() {
+	for i := 0; i < 100; i++ {
+		go add1()
+		go sub1()
+	}
+	time.Sleep(time.Second * 2)
+	fmt.Printf("%v\n", atomValue)
+}
+
+var atom2 int32 = 100
+
+func add2() {
+	atomic.AddInt32(&atom2, 1)
+}
+
+func sub2() {
+	atomic.AddInt32(&atom2, -1)
+}
+
+func testAtom2() {
+	for i := 0; i < 100; i++ {
+		go add2()
+		go sub2()
+	}
+
+	time.Sleep(time.Second * 2)
+	fmt.Printf("%v\n", atom2)
+}
+
+// atomic常见操作有：
+// •增减
+// 。载入read
+// 。比较并交换cas
+// •交换
+// 。存储write
+func atomDetail1() {
+	var num int32 = 100
+	atomic.AddInt32(&num, 20)
+	fmt.Printf("%v\n", num)
+	atomic.AddInt32(&num, -30)
+	fmt.Printf("%v\n", num)
+}
+
+func atomDetail2() {
+	var num int32 = 100
+	atomic.LoadInt32(&num) //read
+	fmt.Printf("%v\n", num)
+
+	atomic.StoreInt32(&num, 200) //write
+	fmt.Printf("%v\n", num)
+}
+
+func casDetail() {
+	var num int32 = 100
+	var newNum = atomic.CompareAndSwapInt32(&num, 100, 200)
+	fmt.Printf("%v\n", newNum)
+	fmt.Printf("%v\n", num)
+}
+
+// golang标准库os模块-文件目录
+func createFile() {
+	myFile, err := os.Create("myGolang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		fmt.Printf("%v\n", myFile.Name())
+	}
+}
+
+// 创建目录
+func createMake() {
+	err := os.Mkdir("test", os.ModePerm)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+func createMake2() {
+	err := os.MkdirAll("demo_dir/model/other", os.ModePerm)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+// 删除目录和文件
+func removeFile() {
+	err := os.Remove("myGolang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+func removeDir() {
+	err := os.RemoveAll("demo_dir")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+// 获得工作目录
+func haveGetwd() {
+	dir, _ := os.Getwd()
+	fmt.Printf("%v\n", dir)
+}
+
+// 修改工作目录
+func changeDir() {
+	err := os.Chdir("d:/")
+	if err != nil {
+		fmt.Printf("err: %vIn", err)
+	}
+	fmt.Printf(os.Getwd())
+}
+
+// 获取零时目录
+func getTemp() {
+	dir := os.TempDir()
+	fmt.Printf("%v\n", dir)
+}
+
+// 重命名
+func rename() {
+	err := os.Rename("myGolang1.txt", "myGolang2.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+// 读文件
+func readFile() {
+	file, err := os.ReadFile("myGolang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		fmt.Printf("%v\n", string(file[:]))
+	}
+}
+
+// 写文件
+func writeFile() {
+	var str = "beidixiaoxiong"
+	err := os.WriteFile("myGolang.txt", []byte(str), os.ModePerm)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
 func main() {
-	timerDemo1()
+
 }
