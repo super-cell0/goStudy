@@ -1956,7 +1956,7 @@ func casDetail() {
 
 // golang标准库os模块-文件目录
 func createFile() {
-	myFile, err := os.Create("myGolang.txt")
+	myFile, err := os.Create("my_golang.txt")
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	} else {
@@ -1981,7 +1981,7 @@ func createMake2() {
 
 // 删除目录和文件
 func removeFile() {
-	err := os.Remove("myGolang.txt")
+	err := os.Remove("my_golang2.txt")
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
@@ -2017,7 +2017,7 @@ func getTemp() {
 
 // 重命名
 func rename() {
-	err := os.Rename("myGolang1.txt", "myGolang2.txt")
+	err := os.Rename("my_golang.txt", "my_golang.txt")
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
@@ -2025,7 +2025,7 @@ func rename() {
 
 // 读文件
 func readFile() {
-	file, err := os.ReadFile("myGolang.txt")
+	file, err := os.ReadFile("my_golang.txt")
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	} else {
@@ -2035,13 +2035,93 @@ func readFile() {
 
 // 写文件
 func writeFile() {
-	var str = "beidixiaoxiong"
-	err := os.WriteFile("myGolang.txt", []byte(str), os.ModePerm)
+	var str = "hello golang"
+	err := os.WriteFile("my_golang.txt", []byte(str), os.ModePerm)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
 }
 
-func main() {
+func openCloseFile() {
+	file, err := os.Open("my_golang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		fmt.Printf("%v\n", file.Name())
+		err = file.Close()
+		if err != nil {
+			return
+		}
+	}
+}
 
+func openFile1() {
+	file, err := os.OpenFile("my_golang2.txt", os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		fmt.Printf("fileName: %v\n", file.Name())
+		err = file.Close()
+		if err != nil {
+			return
+		}
+	}
+}
+
+func readOpen2() {
+	var file, err = os.Open("my_golang.txt")
+	for {
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		var buffer = make([]byte, 10)
+		var myLen, err1 = file.Read(buffer)
+		if err1 == io.EOF {
+			break
+		}
+		fmt.Printf("%v\n", myLen)
+		fmt.Printf("%v\n", string(buffer))
+	}
+	err = file.Close()
+	if err != nil {
+		return
+	}
+}
+
+func readAtOpen() {
+	file, err := os.Open("my_golang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	var buf = make([]byte, 3)
+	n, _ := file.ReadAt(buf, 3)
+	fmt.Printf("%v\n", n)
+	fmt.Printf("%v\n", string(buf))
+}
+
+// 判断是文件还是一个目录
+func demoFile() {
+	dir, err := os.ReadDir("my_golang.txt")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		for _, d := range dir {
+			fmt.Printf("d.isDir: %v\n", d.IsDir())
+			fmt.Printf("d.Name: %v\n", d.Name())
+		}
+	}
+}
+
+func seekFile() {
+	file, _ := os.Open("my_golang.txt")
+	file.Seek(3, 0)
+	var buf = make([]byte, 10)
+	n, _ := file.Read(buf)
+	fmt.Printf("n: %v\n", n)
+	fmt.Printf("string(buf): %v\n", string(buf))
+	file.Close()
+}
+
+func main() {
+	seekFile()
 }
