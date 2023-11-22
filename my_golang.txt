@@ -1,1 +1,5 @@
-hello golang
+hello worldg... this is ... 这样做可以确保在函数返回之前关闭文件，即使在函数中间有其他操作
+hello golang 8899AJSJABSDJSASAJSJABSDJSAS
+AJSJABSDJSASconcerning: 关于、涉及
+AJSJABSDJSAS
+concerning: 关于、涉及

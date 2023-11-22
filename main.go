@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"godaily/user"
@@ -10,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"sync"
@@ -2122,6 +2124,325 @@ func seekFile() {
 	file.Close()
 }
 
+func writeDemo() {
+	file, err := os.OpenFile("my_golang.txt", os.O_RDWR, 0755)
+	if err != nil {
+		fmt.Printf("%n\n", err)
+	}
+	file.Write([]byte("hello golang... this is ... 这样做可以确保在函数返回之前关闭文件，即使在函数中间有其他操作。"))
+	file.Close()
+}
+
+func writeString() {
+	file, _ := os.OpenFile("my_golang.txt", os.O_RDWR|os.O_APPEND, 0755)
+	file.WriteString("hello golang 8899")
+	file.Close()
+}
+
+func writeAtDemo() {
+	file, _ := os.OpenFile("my_golang.txt", os.O_RDWR, 0755)
+	file.WriteAt([]byte("world"), 6)
+	file.Close()
+}
+
+// os进程相关的 进程（Process）和线程（Thread）--window
+func processDemoForWindow() {
+	//获取当前正在运行的进程id
+	fmt.Printf("os.Getpid: %v\n", os.Getpid())
+	//父id
+	fmt.Printf("os.Getppid: %v\n", os.Getppid())
+
+	var attr = &os.ProcAttr{
+		//files指定新进程继承的活动文件对象
+		//前三个分别为，标准输入、标准输出、标准错误输出
+		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+
+		//新进程的环境变量
+		Env: os.Environ(),
+	}
+
+	//开始一个进程
+	process, err := os.StartProcess("/System/Applications/TextEdit.app", []string{"/Users/mac/Downloads/swift.txt"}, attr)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+
+	fmt.Println(process)
+	fmt.Println("进程ID: ", process.Pid)
+
+	//通过进程TD查找进程
+	findProcess, _ := os.FindProcess(process.Pid)
+	fmt.Println(findProcess)
+
+	//等待10秒，执行函数
+	time.AfterFunc(time.Second*10, func() {
+		//向p进程发送退出信号
+		process.Signal(os.Kill)
+	})
+
+	///等待进程p的退出，返回进程状态
+	processWait, _ := process.Wait()
+	fmt.Println(processWait.String())
+}
+
+// mac
+func processDemoForMac() {
+	fmt.Printf("os.Getpid: %v\n", os.Getpid())
+	fmt.Printf("os.Getppid: %v\n", os.Getppid())
+
+	cmd := exec.Command("open", "/Users/mac/Downloads/swift.txt")
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	fmt.Println("进程ID: ", cmd.Process.Pid)
+
+	// 通过进程PID查找进程
+	findProcess, _ := os.FindProcess(cmd.Process.Pid)
+	fmt.Println("findProcess: ", findProcess)
+
+	// 等待10秒，执行函数
+	time.AfterFunc(time.Second*10, func() {
+		// 向cmd进程发送退出信号
+		cmd.Process.Signal(os.Kill)
+	})
+
+	// 等待进程cmd的退出，返回进程状态
+	processWait, _ := cmd.Process.Wait()
+	fmt.Println("processWait: ", processWait.String())
+}
+
+func processDemoForMac2() {
+	fmt.Printf("os.Getpid: %v\n", os.Getpid())
+	fmt.Printf("os.Getppid: %v\n", os.Getppid())
+
+	cmd := exec.Command("open", "/Users/mac/Downloads/swift.txt")
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	fmt.Println("进程ID: ", cmd.Process.Pid)
+
+	// 通过进程PID查找进程
+	findProcess, _ := os.FindProcess(cmd.Process.Pid)
+	fmt.Println(findProcess)
+
+	// 等待应用程序完成
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("Error waiting for process: %v\n", err)
+	}
+
+	fmt.Println("应用程序完成")
+
+	err = findProcess.Kill()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	} else {
+		fmt.Printf("应用程序被终止")
+	}
+}
+
+// ENV
+func envDemo() {
+	//fmt.Printf("os.Environ%v\n", os.Environ())
+	getenv := os.Getenv("GOPATH")
+	fmt.Printf("%v\n", getenv)
+}
+
+func envDemo2() {
+	env, b := os.LookupEnv("GOPATH")
+	if b {
+		fmt.Printf("%v\n", env)
+	}
+}
+
+// Go语言中，为了方便开发者使用，将I0操作封装在了如下几个包中：
+// •io为10原语（I/0primitives）提供基本的接口osFileReaderWriter
+// •io/ioutil封装一些实用的1/0函数
+// •fAht实现格式化1/0，类似C语言中的printf和scanf
+// •bufio实现带缓冲1/0
+func testCopy() {
+	reader := strings.NewReader("hello golang\n")
+	_, err := io.Copy(os.Stdout, reader)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// TODO io包源码
+// ReadAll
+// 读取数据，返回读到的字节slice
+// ReadDir
+// 读取一个目录，返回目录入口数组［los.Filelnfo
+// ReadFile
+// 读一个文件，返回文件内容（字持Slice）
+// WriteFile
+// 根据文件路径，写入字节slice
+// TempDir
+// 在一个目录中创建指定前缀名的临时目录，返回新临时目录的路径
+// TempFile
+// 在一个目录中创建指定前缀名的临时文件，返回os.File
+func readAllDemo() {
+	open, err := os.Open("my_golang.txt")
+	defer func(open *os.File) {
+		err := open.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(open)
+	all, err := io.ReadAll(open)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%v\n", string(all))
+}
+
+// TODO
+// bufio包实现了有缓冲的I/O。它包装一个io.Reader或io.Writer接口对象，创建另一个也实现了该接口，且同时
+// 还提供了缓冲和一些文本I/O的帮助函数的对象。
+func bufioDemo() {
+	//reader := strings.NewReader("hello go")
+	open, _ := os.Open("my_golang.txt")
+	newReader := bufio.NewReader(open)
+	readString, _ := newReader.ReadString('\n')
+	fmt.Printf("%v\n", readString)
+
+}
+func bufioDemo2() {
+
+}
+
+func bufioDemo3() {
+	reader := strings.NewReader("ABCDEFGHIJK")
+	newReader := bufio.NewReader(reader)
+
+	readByte, _ := newReader.ReadByte()
+	fmt.Printf("%v\n", string(readByte))
+
+	b, _ := newReader.ReadByte()
+	fmt.Printf("%v\n", string(b))
+
+	err := newReader.UnreadByte()
+	if err != nil {
+		return
+	}
+	b2, _ := newReader.ReadByte()
+	fmt.Printf("%v\n", string(b2))
+}
+
+func bufioDemo4() {
+	reader := strings.NewReader("你好 世界！")
+	newReader := bufio.NewReader(reader)
+
+	r, size, _ := newReader.ReadRune()
+	fmt.Printf("%v %v\n", string(r), size)
+
+	readRune, s, _ := newReader.ReadRune()
+	fmt.Printf("%v, %v\n", string(readRune), s)
+
+	newReader.UnreadRune()
+	r2, i, _ := newReader.ReadRune()
+	fmt.Printf("%v, %v\n", string(r2), i)
+}
+
+func bufioDemo5() {
+	reader := strings.NewReader("ABC\nDEF\r\nGHI\r\nGHI")
+	newReader := bufio.NewReader(reader)
+
+	line, prefix, _ := newReader.ReadLine()
+	fmt.Printf("%q, %v\n", line, prefix)
+
+	readLine, isPrefix, _ := newReader.ReadLine()
+	fmt.Printf("%q, %v\n", readLine, isPrefix)
+
+	l, p, _ := newReader.ReadLine()
+	fmt.Printf("%q, %v\n", l, p)
+
+	line2, b, _ := newReader.ReadLine()
+	fmt.Printf("%q, %v\n", line2, b)
+}
+
+func bufioDemo6() {
+	reader := strings.NewReader("ABC,DFG,DIJ,UYT")
+	newReader := bufio.NewReader(reader)
+
+	line1, _ := newReader.ReadSlice(',')
+	fmt.Printf("%v\n", string(line1))
+
+	line2, _ := newReader.ReadSlice(',')
+	fmt.Printf("%v\n", string(line2))
+
+	line3, _ := newReader.ReadSlice(',')
+	fmt.Printf("%v\n", string(line3))
+
+	line4, _ := newReader.ReadSlice(',')
+	fmt.Printf("%v\n", string(line4))
+}
+
+func bufioDemo7() {
+	reader := strings.NewReader("ABC HDGSU SA KDS AS")
+	newReader := bufio.NewReader(reader)
+
+	readBytes1, _ := newReader.ReadBytes(' ')
+	fmt.Printf("%q\n", readBytes1)
+
+	readBytes2, _ := newReader.ReadBytes(' ')
+	fmt.Printf("%q\n", readBytes2)
+
+	readBytes3, _ := newReader.ReadBytes(' ')
+	fmt.Printf("%q\n", readBytes3)
+
+	readBytes4, _ := newReader.ReadBytes(' ')
+	fmt.Printf("%q\n", readBytes4)
+
+	readBytes5, _ := newReader.ReadBytes(' ')
+	fmt.Printf("%q\n", readBytes5)
+}
+
+func bufioDemo8() {
+	reader := strings.NewReader("\nAJSJABSDJSAS\n")
+	newReader := bufio.NewReader(reader)
+
+	//buffer := bytes.NewBuffer(make([]byte, 0))
+	//写入文件
+	file, _ := os.OpenFile("my_golang.txt", os.O_RDWR|os.O_APPEND, 0777)
+	defer file.Close()
+	newReader.WriteTo(file)
+	//fmt.Printf("%v\n", buffer)
+
+}
+
+func bufioDemo9() {
+	file, _ := os.OpenFile("my_golang.txt", os.O_RDWR|os.O_APPEND, 0777)
+	defer file.Close()
+	writer := bufio.NewWriter(file)
+	writer.WriteString("concerning: 关于、涉及\n")
+	writer.Flush()
+}
+
+func bufioDemo10() {
+	b := bytes.NewBuffer(make([]byte, 0))
+	bw := bufio.NewWriter(b)
+	fmt.Println(bw.Available()) // 4096
+	fmt.Println(bw.Buffered())  // 0
+
+	bw.WriteString("ABCDEFGHIJKLMN")
+	fmt.Println(bw.Available())
+	fmt.Println(bw.Buffered())
+	fmt.Printf("%q\n", b)
+
+	bw.Flush()
+	fmt.Println(bw.Available())
+	fmt.Println(bw.Buffered())
+	fmt.Printf("%q\n", b)
+}
+
 func main() {
-	seekFile()
+	bufioDemo10()
 }
