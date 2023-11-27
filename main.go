@@ -2443,6 +2443,43 @@ func bufioDemo10() {
 	fmt.Printf("%q\n", b)
 }
 
+// 11-27 TODO
+func scannerDemo() {
+	reader := strings.NewReader("hello golang fighting!")
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+}
+
+func scanDemo() {
+	reader := strings.NewReader("你 好 世界 你在干嘛哦 哎哟")
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanRunes)
+	for scanner.Scan() {
+		//fmt.Println(scanner.Text())
+		fmt.Printf("%s\n", scanner.Text())
+	}
+}
+
+func logDemo1() {
+	log.Print("hello golang\n")
+
+	log.Printf("%d", 239)
+
+	name := "Tom"
+	age := 23
+	log.Println(name, " ", age)
+}
+
+func panicDemo1() {
+	defer fmt.Printf("panic结束之后的执行。。。\n")
+	log.Print("hello golang")
+	log.Panic("my panic")
+	fmt.Printf("end...\n")
+}
+
 func main() {
-	bufioDemo10()
+	panicDemo1()
 }
