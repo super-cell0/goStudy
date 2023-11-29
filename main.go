@@ -2480,6 +2480,215 @@ func panicDemo1() {
 	fmt.Printf("end...\n")
 }
 
+func logDemo2() {
+	defer fmt.Printf("defer...\n")
+	log.Print("my log")
+	log.Fatal("fatal...")
+	fmt.Printf("end...\n")
+}
+
+// TODO
+// 1129
+// 标准日志配置
+/*
+func init() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
+	log.SetPrefix("MY LOG: ")
+	file, err := os.OpenFile("my_log.log", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0664)
+	if err != nil {
+		log.Fatal("日志文件出错")
+	}
+	log.SetOutput(file)
+}
+*/
+
+func logInput() {
+	flags := log.Flags()
+	fmt.Printf("%v\n", flags)
+	log.Print("my log ...\n")
+}
+
+// 自定义的 logger
+var logger *log.Logger
+
+func init() {
+	file, err := os.OpenFile("my_log.log", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0664)
+	if err != nil {
+		log.Fatal("日志文件出错")
+	}
+	logger = log.New(file, "MY NEW LOG: ", log.Ldate|log.Ltime|log.Llongfile)
+}
+
+func myLoggerDemo() {
+	logger.Println("贝蒂小熊的golang travel")
+}
+
+//new和make区别：
+//1.make只能用来分配及初始化类型为slice，map，chan的数据; new可以分配任意类型的数据
+//2.new分配返回的是指针，即类型*T; make返回引用，即T;
+//3.new分配的空间被清零，make分配后，会进行初始化.
+
+func builtinDemo() {
+	new1 := []int{23, 66, 98}
+	new2 := append(new1, 25)
+	fmt.Printf("%v\n", new2)
+	new3 := []int{100, 200, 400}
+	newSlice := append(new1, new3...)
+	fmt.Printf("%v\n", newSlice)
+	fmt.Printf("%v %v\n", len(newSlice), len(new1))
+}
+
+func builtinDemo2() {
+	name := "Tom"
+	age := 23
+	print(name, age, "\n") //不会换行
+	println(name, age)
+}
+
+func builtinDemo3() {
+	defer fmt.Printf("panic ended defer start\n")
+	panic("god damn!\n")
+	fmt.Println("end\n")
+}
+
+func newAndMake() {
+	b := new(bool)
+	fmt.Printf("bool: %v\n", *b)
+	i := new(int)
+	fmt.Printf("int: %v\n", *i)
+	s := new(string)
+	fmt.Printf("string: %v\n", *s)
+}
+
+func newMake2() {
+	var p = new([]int)
+	fmt.Printf("%v\n", p)
+	m := make([]int, 10)
+	fmt.Printf("%v\n", m)
+}
+
+func byteDemo1() {
+	var a = 100
+	var b byte = 200
+	b = byte(a)
+	a = int(b)
+
+	var s = "hello golang"
+	i := []byte{1, 3, 4}
+	s = string(i)
+	i = []byte(s)
+}
+
+func byteDemo2() {
+	//是否包含
+	wg := "www.google.com\n"
+	newWg := []byte(wg)
+	b1 := []byte("www.gaagle.com")
+	b2 := []byte("www.google.com")
+	contains := bytes.Contains(newWg, b1)
+	println(contains)
+	contains = bytes.Contains(newWg, b2)
+	println(contains)
+}
+
+func byteDemo3() {
+	//计数
+	wg := "www.google.com\n"
+	newWg := []byte(wg)
+	b3 := []byte("o")
+	count := bytes.Count(newWg, b3)
+	println("有几个字母o：", count)
+}
+
+func byteDemo4() {
+	//重复
+	//b4 := []byte("google")
+	wg := "www.google.com\n"
+	newWg := []byte(wg)
+	println(string(bytes.Repeat(newWg, 3)))
+}
+
+func byteDemo5() {
+	//替换
+	b5 := []byte("hello golang")
+	old := []byte("l")
+	myNew := []byte("L")
+	fmt.Println(string(bytes.Replace(b5, old, myNew, 1)))
+	fmt.Println(string(bytes.Replace(b5, old, myNew, 3)))
+	fmt.Println(string(bytes.Replace(b5, old, myNew, -1))) //-1全部被替换
+}
+
+func byteDemo6() {
+	//runes
+	b6 := []byte("golang语言 真不错")
+	b7 := bytes.Runes(b6)
+	fmt.Printf("%v\n", len(b6)) //22
+	fmt.Printf("%v\n", len(b7)) //12
+}
+
+// 字符的链接join
+func byteDemo7() {
+	b := [][]byte{[]byte("hello"), []byte("golang")}
+	b2 := []byte(",")
+	fmt.Println(string(bytes.Join(b, b2)))
+}
+
+func byteDemo8() {
+	var data = []byte("hello golang!")
+	var reader = bytes.NewReader(data)
+
+	//从reader中读取数据
+	//创建一个缓冲区
+	buffer := make([]byte, 1)
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			break
+		}
+		fmt.Println("读取到: ", string(buffer[:n]))
+	}
+}
+
+// bytes.Buffer
+func byteDemo9() {
+	var b bytes.Buffer //r//直接定义一个Buffer变量，不用初始化，可以直接使用
+	fmt.Printf("%v\n", b)
+	var b1 = new(bytes.Buffer)
+	fmt.Printf("%v\n", b1)
+	var b2 = bytes.NewBuffer([]byte("hello golang!"))
+	fmt.Printf("%v\n", b2)
+	var b3 = bytes.NewBufferString("hello golang")
+	fmt.Printf("%v\n", b3)
+}
+
+func byteDemo10() {
+	var b bytes.Buffer
+	n, _ := b.WriteString("hello golang")
+	fmt.Printf("%v\n", n)
+	fmt.Printf("%v\n", string(b.Bytes()))
+}
+
+func byteDemo11() {
+	bufferString := bytes.NewBufferString("hello golang")
+	newBuffer := make([]byte, 1)
+	for {
+		n, err := bufferString.Read(newBuffer)
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			break
+		}
+		fmt.Printf("%v\n", string(newBuffer[:n]))
+	}
+}
+
 func main() {
-	panicDemo1()
+	myLoggerDemo()
 }
