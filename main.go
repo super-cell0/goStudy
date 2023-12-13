@@ -3,7 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"database/sql"
+	_ "database/sql"
+	"encoding/json"
+	"encoding/xml"
+	"errors"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"godaily/user"
 	"io"
 	"log"
@@ -13,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -2689,6 +2696,405 @@ func byteDemo11() {
 	}
 }
 
+func check(str string) (string, error) {
+	if str == "" {
+		err := errors.New("字符不能为空")
+		return "", err
+	} else {
+		return str, nil
+	}
+}
+
+func checkDemo() {
+	s, err := check("hello golang")
+	if err != nil {
+		fmt.Printf("err: %v\n", err.Error())
+	} else {
+		fmt.Printf("%v\n", s)
+	}
+}
+
+// MyError TODO: error
+type MyError struct {
+	When time.Time
+	What string
+}
+
+// Error
+func (e MyError) Error() string {
+	return fmt.Sprintf("%v: %v\n", e.When, e.What)
+}
+
+func oops() error {
+	return MyError{
+		When: time.Date(2023, 12, 01, 16, 29, 0, 0, time.UTC),
+		What: "文件打开闪退",
+	}
+}
+
+func oopsDemo() {
+	err := oops()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func sortDemo1() {
+	a := []int{1, 34, 2, 98, 23, 55, 22}
+	sort.Ints(a)
+	fmt.Printf("%v\n", a)
+}
+
+// MyIntS 自定的排序
+type MyIntS []int
+
+func (m MyIntS) Len() int {
+	return len(m)
+}
+
+func (m MyIntS) Less(i, j int) bool {
+	fmt.Println(i, j, m[i] < m[j], m)
+	return m[i] < m[j]
+}
+
+func (m MyIntS) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+func mySortDemo() {
+	num := []int{45, 34, 22, 78, 333, 2, 7}
+	sort.Sort(MyIntS(num))
+	fmt.Printf("%v\n", num)
+}
+
+type People struct {
+	Name string
+	Age  int
+}
+
+type testSlice []People
+
+func (m testSlice) Len() int {
+	return len(m)
+}
+
+func (m testSlice) Less(i, j int) bool {
+	return m[i].Age < m[j].Age
+}
+
+func (m testSlice) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+func sortDemo2() {
+	mySlice := testSlice{
+		{Name: "chen", Age: 23},
+		{Name: "liu", Age: 32},
+		{Name: "ma", Age: 11},
+		{Name: "zhang", Age: 54},
+	}
+	fmt.Println(mySlice)
+	sort.Sort(mySlice)
+	fmt.Println(mySlice)
+}
+
+func timeDemo1() {
+	now := time.Now()
+	fmt.Printf("%v\n", now)
+	//day := now.YearDay()
+	//fmt.Printf("%v\n", day)
+	fmt.Println(now.Format("2006-01-02-15-01"))
+	fmt.Printf("%T, %v\n", now.UnixNano(), now.UnixNano())
+}
+
+// 时间戳转化为普通的时间格式
+func timeDemo2() {
+	unix := time.Now().Unix()
+	t := time.Unix(unix, 0)
+	fmt.Printf("%v\n", t)
+}
+
+func timDemo3() {
+	now := time.Now()
+	fmt.Println(now)
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+	inLocation, err := time.ParseInLocation("2006-01-02-15:04", "2023-12-03-22:10", location)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+	fmt.Printf("%v\n", inLocation)
+	fmt.Printf("%v\n", inLocation.Sub(now))
+}
+
+// TODO json格式
+type PersonJSON struct {
+	Name  string
+	Age   int
+	Email string
+}
+
+func MarshalDemo() {
+	jsonDemo := PersonJSON{
+		Name:  "tom",
+		Age:   23,
+		Email: "23@qq.com",
+	}
+	marshal, _ := json.Marshal(jsonDemo)
+	fmt.Printf("%v\n", string(marshal))
+}
+
+func marshalDemo2() {
+	i := []byte(`{"Name":"tom","Age":23,"Email":"23@qq.com"}`)
+	var person PersonJSON
+	err := json.Unmarshal(i, &person)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	fmt.Printf("%v\n", person)
+}
+
+func marshalDemo3() {
+	var a = []byte(`{"Name": "tom", "Age" :20, "Email": "tom@gmail.com", "Parents" :["big tom", "kite"]}`)
+	var f interface{}
+	json.Unmarshal(a, &f)
+	fmt.Printf("%v\n", f)
+}
+
+type PersonN struct {
+	Name   string
+	Age    int
+	Email  string
+	Parent []string
+}
+
+func marshalDemo4() {
+	n := PersonN{
+		Name:   "tom",
+		Age:    34,
+		Email:  "2323@qq.com",
+		Parent: []string{"big tom", "big kite"},
+	}
+	marshal, _ := json.Marshal(n)
+	fmt.Printf("%v\n", string(marshal))
+}
+
+func decode() {
+	open, _ := os.Open("a.json")
+	defer open.Close()
+	decoder := json.NewDecoder(open)
+	var data map[string]interface{}
+	decoder.Decode(&data)
+	fmt.Printf("%v\n", data)
+}
+
+func encode() {
+	n := PersonN{
+		Name:   "TOM",
+		Age:    78,
+		Email:  "2895100888@qq.com",
+		Parent: []string{"big Tom", "big Kite"},
+	}
+
+	file, _ := os.OpenFile("a.json", os.O_RDWR|os.O_APPEND, 0777)
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	encoder.Encode(n)
+}
+
+type PersonXML struct {
+	XMLName xml.Name `xml:"person"`
+	Name    string   `xml:"name"`
+	Age     int      `xml:"age"`
+	Email   string   `xml:"email"`
+}
+
+func xmlDemo() {
+	person := PersonXML{
+		Name:  "tom",
+		Age:   23,
+		Email: "23@qq.com",
+	}
+	marshal, _ := xml.MarshalIndent(person, " ", "  ")
+	fmt.Printf("%v\n", string(marshal))
+}
+
+func xmlDemo2() {
+	var s = `
+ <person>
+   <name>tom</name>
+   <age>23</age>
+   <email>23@qq.com</email>
+ </person>
+    `
+	i := []byte(s)
+	var person PersonXML
+	xml.Unmarshal(i, &person)
+	fmt.Printf("%v\n", person)
+}
+
+func xmlDemo3() {
+	file, _ := os.ReadFile("b.xml")
+	var person PersonXML
+	xml.Unmarshal(file, &person)
+	fmt.Printf("%v\n", person)
+}
+
+func xmlDemo4() {
+	person := PersonXML{
+		Name:  "tom",
+		Age:   23,
+		Email: "23@qq.com",
+	}
+	file, _ := os.OpenFile("b.xml", os.O_WRONLY, 0777)
+	defer file.Close()
+	encoder := xml.NewEncoder(file)
+	encoder.Encode(person)
+}
+
+func mathDemo() {
+	fmt.Printf("%v\n", math.Pi)
+}
+
+func init() {
+	//以时间作为初始化种子
+	rand.NewSource(time.Now().UnixNano())
+}
+
+func randomDemo() {
+	//seed := time.Now().UnixNano()
+	//source := rand.NewSource(seed)
+	//r := rand.New(source
+	random := rand.Intn(300)
+	//random := r.Intn(200)
+	fmt.Printf("%v\n", random)
+}
+
+func mysqlDemo() {
+	db, err := sql.Open("mysql", "root:Apple980117@@/my_golang_db")
+	if err != nil {
+		panic(err)
+	}
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	fmt.Printf("%v\n", db)
+}
+
+// 操作数据库
+var db *sql.DB
+
+func initDB() (err error) {
+	dsn := "root:123456@tcp(0.0.0.0:3306)/go_cart?charset=utf8mb4&parseTime=True"
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		return err
+	}
+	err = db.Ping()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func LinkDB() {
+	err := initDB()
+	if err != nil {
+		fmt.Printf("初始化失败: %v\n", err)
+		return
+	} else {
+		fmt.Printf("初始化成功\n")
+		//defer db.Close()
+	}
+}
+
+// 插入数据库
+func insertDemo() {
+	var s = "insert into users(username, password) values(?,?)"
+	result, err := db.Exec(s, "liu", "l987456")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		id, _ := result.LastInsertId()
+		fmt.Printf("id: %v\n", id)
+	}
+}
+
+// 插入数据库
+func insertDemo2(username string, password string) {
+	var s = "insert into users(username, password) values(?,?)"
+	result, err := db.Exec(s, username, password)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		id, _ := result.LastInsertId()
+		fmt.Printf("id: %v\n", id)
+	}
+}
+
+// User 单行查询
+type User struct {
+	id       int
+	username string
+	password string
+}
+
+func queryRow() {
+	var str = "select * from users where id = ?"
+	var u User
+	err := db.QueryRow(str, 2).Scan(&u.id, &u.username, &u.password)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		fmt.Printf("user: %v\n", u)
+	}
+}
+
+// 多行查询
+func queryRows() {
+	var s = "select * from users"
+	var u User
+	rows, err := db.Query(s)
+	defer rows.Close()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		for rows.Next() {
+			rows.Scan(&u.id, &u.username, &u.password)
+			fmt.Printf("%v\n", u)
+		}
+	}
+}
+
+// 更新数据库
+func updateSQL() {
+	var s = "update users set username=?, password=? where id=?"
+	result, err := db.Exec(s, "lol", "lol123", 3)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		affected, _ := result.RowsAffected()
+		fmt.Printf("affected: %v\n", affected)
+	}
+}
+
+// 删除数据
+func deleteSQL() {
+	var s = "delete from users where id=?"
+	result, err := db.Exec(s, 5)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	} else {
+		affected, _ := result.RowsAffected()
+		fmt.Printf("%v\n", affected)
+	}
+}
+
 func main() {
-	myLoggerDemo()
 }
